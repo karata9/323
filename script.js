@@ -97,6 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let uploadedImages = []; // Local temporary memory for images
 
+    function renderImagePreview() {
+        if (!imagePreview) return;
+        imagePreview.innerHTML = uploadedImages.map((imgSrc, idx) => `
+            <div style="position:relative; display:inline-block; margin:5px;">
+                <img src="${imgSrc}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                <button type="button" class="btn-red" style="position:absolute; top:-5px; right:-5px; border-radius:50%; width:24px; height:24px; padding:0; line-height:1; cursor:pointer;" onclick="window.removeTempImage(${idx})">X</button>
+            </div>
+        `).join('');
+        if (imageCountSpan) imageCountSpan.textContent = `(${uploadedImages.length})`;
+    }
+
+    window.removeTempImage = function(idx) {
+        uploadedImages.splice(idx, 1);
+        renderImagePreview();
+    };
+
     if (openUploadModalBtn && uploadModal) {
         openUploadModalBtn.addEventListener('click', () => {
             uploadModal.classList.add('active');
@@ -116,15 +132,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const files = Array.from(e.target.files);
             files.forEach(file => {
                 if (file.type.startsWith('image/')) {
-                    const url = URL.createObjectURL(file);
-                    uploadedImages.push(url);
-                    
-                    const img = document.createElement('img');
-                    img.src = url;
-                    imagePreview.appendChild(img);
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200; 
+                            const MAX_HEIGHT = 1200;
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                            } else {
+                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                            }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                            
+                            uploadedImages.push(dataUrl);
+                            renderImagePreview();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
-            // Reset input so same files can be re-selected if needed
             imageInput.value = '';
         });
     }
@@ -202,24 +237,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const filteredTransactions = transactionsData.filter(t => {
             const matchesSearch = t.sellerName.toLowerCase().includes(searchTerm) || 
+                                  (t.buyerName && t.buyerName.toLowerCase().includes(searchTerm)) ||
                                   (t.propNumber && t.propNumber.includes(searchTerm));
             const matchesFilter = t.status === currentFilter;
             return matchesSearch && matchesFilter;
         });
 
-        const createCardHTML = (t) => `
-            <div class="transaction-card" data-id="${t.id}">
-                <div class="transaction-card-info">
-                    <h4>عقار رقم: ${t.propNumber}</h4>
-                    <p><strong>البائع:</strong> ${t.sellerName} ${t.sellerPhone ? `<span dir="ltr" style="font-size: 0.9em; margin-right: 5px;">(<a href="tel:${t.sellerPhone}" style="text-decoration: none; color: var(--secondary-color);" onclick="event.stopPropagation();">📞 ${t.sellerPhone}</a>)</span>` : ''}</p>
+        const createCardHTML = (t) => {
+            let isOffice = (t.sellerName === 'المكتب' || t.buyerName === 'المكتب');
+            let officeClass = isOffice ? 'office-transaction' : '';
+            return `
+                <div class="transaction-card ${officeClass}" data-id="${t.id}">
+                    <div class="transaction-card-info">
+                        <h4>عقار رقم: ${t.propNumber}</h4>
+                        <p><strong>البائع:</strong> ${t.sellerName} ${t.sellerPhone ? `<span dir="ltr" style="font-size: 0.9em; margin-right: 5px;">(<a href="tel:${t.sellerPhone}" style="text-decoration: none; color: var(--secondary-color);" onclick="event.stopPropagation();">📞 ${t.sellerPhone}</a>)</span>` : ''}</p>
+                        <p><strong>المشتري:</strong> ${t.buyerName}</p>
+                    </div>
+                    <div class="transaction-actions" style="display: flex; gap: 10px; margin-left: 15px; margin-right: 15px;">
+                        <button type="button" class="action-btn edit-btn" data-id="${t.id}" title="تعديل">✏️</button>
+                        <button type="button" class="action-btn delete-btn" data-id="${t.id}" title="حذف">🗑️</button>
+                    </div>
+                    <div class="transaction-card-arrow">&#10094;</div>
                 </div>
-                <div class="transaction-actions" style="display: flex; gap: 10px; margin-left: 15px; margin-right: 15px;">
-                    <button type="button" class="action-btn edit-btn" data-id="${t.id}" title="تعديل">✏️</button>
-                    <button type="button" class="action-btn delete-btn" data-id="${t.id}" title="حذف">🗑️</button>
-                </div>
-                <div class="transaction-card-arrow">&#10094;</div>
-            </div>
-        `;
+            `;
+        };
 
         allTransactionsList.innerHTML = filteredTransactions.length > 0 
             ? filteredTransactions.map(createCardHTML).join('')
@@ -270,10 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('amount-remaining').value = transaction.amountRemaining ? Number(transaction.amountRemaining).toLocaleString('en-US') : '0';
                     
                     uploadedImages = [...(transaction.images || [])];
-                    if (imageCountSpan) imageCountSpan.textContent = `(${uploadedImages.length})`;
-                    if (imagePreview) {
-                        imagePreview.innerHTML = uploadedImages.map(imgSrc => `<img src="${imgSrc}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">`).join('');
-                    }
+                    renderImagePreview();
 
                     editingId = id;
                     document.querySelector('.submit-btn').textContent = 'حفظ التعديلات';
@@ -325,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let t = transactionsData.find(x => x.id === id);
         let val = Number(valStr.replace(/,/g, ''));
         t.commissions[type] = val;
+        renderTransactions();
         showDetailsModal(t);
     };
 
@@ -358,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let t = transactionsData.find(x => x.id === pendingCommToggle.id);
                     if (t) {
                         t.commissions[pendingCommToggle.type + 'Paid'] = !t.commissions[pendingCommToggle.type + 'Paid'];
+                        renderTransactions();
                         showDetailsModal(t);
                     }
                 }
@@ -378,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let reason = document.getElementById('new-exp-reason').value || 'مصروف';
         if(amount > 0) {
             t.expensesLog.push({ date, amount, reason });
+            renderTransactions();
             showDetailsModal(t);
         }
     };
@@ -386,8 +427,51 @@ document.addEventListener('DOMContentLoaded', () => {
         let t = transactionsData.find(x => x.id === id);
         if(confirm('هل أنت متأكد من حذف هذا المصروف؟')) {
             t.expensesLog.splice(index, 1);
+            renderTransactions();
             showDetailsModal(t);
         }
+    };
+
+    window.deleteTransactionImage = function(id, idx) {
+        if(confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+            let t = transactionsData.find(x => x.id === id);
+            t.images.splice(idx, 1);
+            renderTransactions();
+            showDetailsModal(t);
+        }
+    };
+
+    window.uploadTransactionImage = function(id, input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                } else {
+                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                
+                let t = transactionsData.find(x => x.id === id);
+                if (!t.images) t.images = [];
+                t.images.push(dataUrl);
+                renderTransactions();
+                showDetailsModal(t);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
     };
 
     // --- ENHANCED DETAILS MODAL ---
@@ -404,10 +488,21 @@ document.addEventListener('DOMContentLoaded', () => {
             imagesHTML = `
                 <p style="margin-top: 15px;"><strong>الصور والمستمسكات:</strong></p>
                 <div class="details-images">
-                    ${t.images.map(imgSrc => `<img src="${imgSrc}" class="fullscreen-trigger" alt="صورة العقار" style="cursor: pointer; transition: transform 0.2s;">`).join('')}
+                    ${t.images.map((imgSrc, idx) => `
+                        <div style="position:relative; display:inline-block;">
+                            <img src="${imgSrc}" class="fullscreen-trigger" alt="صورة العقار" style="cursor: pointer; transition: transform 0.2s;">
+                            <button type="button" class="btn-red" style="position:absolute; top:-5px; right:-5px; border-radius:50%; width:24px; height:24px; padding:0; line-height:1; cursor:pointer;" onclick="window.deleteTransactionImage(${t.id}, ${idx})">X</button>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
+        imagesHTML += `
+            <div style="margin-top: 10px;">
+                <input type="file" id="add-trans-image-input-${t.id}" style="display:none;" accept="image/*" onchange="window.uploadTransactionImage(${t.id}, this)">
+                <button type="button" class="btn-3d btn-primary" onclick="document.getElementById('add-trans-image-input-${t.id}').click()">إضافة صورة جديدة</button>
+            </div>
+        `;
 
         // Calculations
         let baseReceived = Number(t.amountReceived);
@@ -419,10 +514,10 @@ document.addEventListener('DOMContentLoaded', () => {
         t.amountRemaining = currentPropRemaining;
         
         let expensesSum = t.expensesLog.reduce((sum, e) => sum + Number(e.amount), 0);
-        let finalSellerRemaining = currentPropRemaining - expensesSum; 
-        
         let unpaidSellerComm = t.commissions.sellerPaid ? 0 : Number(t.commissions.seller);
         let unpaidBuyerComm = t.commissions.buyerPaid ? 0 : Number(t.commissions.buyer);
+        
+        let finalSellerRemaining = currentPropRemaining - (unpaidSellerComm + expensesSum); 
         let finalOfficeClaim = unpaidSellerComm + unpaidBuyerComm + expensesSum;
 
         detailsContent.innerHTML = `
@@ -457,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </table>
                 <div class="inline-form">
                     <input type="date" id="new-pay-date" value="${new Date().toISOString().split('T')[0]}">
-                    <input type="text" id="new-pay-amount" class="number-format" placeholder="المبلغ">
+                    <input type="text" id="new-pay-amount" class="number-format" inputmode="numeric" pattern="[0-9]*" placeholder="المبلغ">
                     <input type="text" id="new-pay-note" placeholder="ملاحظة (مثال: قسط ثاني)">
                     <button type="button" class="btn-3d btn-green" onclick="window.addPayment(${t.id})">تسديد جديد</button>
                 </div>
@@ -470,12 +565,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tbody>
                         <tr>
                             <td>البائع</td>
-                            <td><input type="text" class="number-format" value="${Number(t.commissions.seller).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'seller', this.value)" style="width:100px; text-align:center;"></td>
+                            <td><input type="text" class="number-format" inputmode="numeric" pattern="[0-9]*" value="${Number(t.commissions.seller).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'seller', this.value)" style="width:100px; text-align:center;"></td>
                             <td><button type="button" class="${t.commissions.sellerPaid ? 'badge-paid' : 'badge-unpaid'}" onclick="window.toggleComm(${t.id}, 'seller')">${t.commissions.sellerPaid ? 'مدفوع' : 'غير مدفوع'}</button></td>
                         </tr>
                         <tr>
                             <td>المشتري</td>
-                            <td><input type="text" class="number-format" value="${Number(t.commissions.buyer).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'buyer', this.value)" style="width:100px; text-align:center;"></td>
+                            <td><input type="text" class="number-format" inputmode="numeric" pattern="[0-9]*" value="${Number(t.commissions.buyer).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'buyer', this.value)" style="width:100px; text-align:center;"></td>
                             <td><button type="button" class="${t.commissions.buyerPaid ? 'badge-paid' : 'badge-unpaid'}" onclick="window.toggleComm(${t.id}, 'buyer')">${t.commissions.buyerPaid ? 'مدفوع' : 'غير مدفوع'}</button></td>
                         </tr>
                     </tbody>
@@ -483,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
             <div class="details-section">
-                <div class="details-title">مصروفات تُخصم من البائع (مثل أجور الكهرباء)</div>
+                <div class="details-title">مصروفات المكتب (مثل أجور الكهرباء)</div>
                 <table class="data-table">
                     <thead><tr><th>التاريخ</th><th>المبلغ</th><th>السبب</th><th>حذف</th></tr></thead>
                     <tbody>
@@ -499,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </table>
                 <div class="inline-form">
                     <input type="date" id="new-exp-date" value="${new Date().toISOString().split('T')[0]}">
-                    <input type="text" id="new-exp-amount" class="number-format" placeholder="المبلغ">
+                    <input type="text" id="new-exp-amount" class="number-format" inputmode="numeric" pattern="[0-9]*" placeholder="المبلغ">
                     <input type="text" id="new-exp-reason" placeholder="السبب">
                     <button type="button" class="btn-3d btn-primary" onclick="window.addExpense(${t.id})">إضافة مصروف</button>
                 </div>
@@ -521,7 +616,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         
         const actionsContainer = document.querySelector('#details-modal .modal-actions');
-        actionsContainer.innerHTML = `<button type="button" id="close-details-btn" class="btn-3d btn-red">إغلاق</button>`;
+        
+        const waMsg = encodeURIComponent(`تفاصيل المعاملة\nرقم العقار: ${t.propNumber}\nالبائع: ${t.sellerName}\nالمشتري: ${t.buyerName}\nالمبلغ الكلي: ${Number(t.propAmount).toLocaleString('en-US')} دينار\nالواصل: ${totalPaidByBuyer.toLocaleString('en-US')} دينار\nالباقي: ${currentPropRemaining.toLocaleString('en-US')} دينار`);
+        
+        actionsContainer.innerHTML = `
+            <button type="button" class="btn-3d" style="background: #25D366; box-shadow: 0 4px 0 #128C7E;" onclick="window.open('https://wa.me/?text=${waMsg}')">مراسلة عبر واتساب 💬</button>
+            <button type="button" id="close-details-btn" class="btn-3d btn-red">إغلاق</button>
+        `;
         
         if (t.status === 'غير مكتملة') {
             const btn = document.createElement('button');
@@ -644,8 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Clear temporary images
             uploadedImages = [];
-            if (imagePreview) imagePreview.innerHTML = '';
-            if (imageCountSpan) imageCountSpan.textContent = '(0)';
+            renderImagePreview();
         });
     }
 
@@ -1029,6 +1129,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const partnerNetDisplay = document.getElementById('partner-net');
     const partnershipHistoryList = document.getElementById('partnership-history-list');
 
+    window.deletePartnership = function(id) {
+        if(confirm('هل أنت متأكد من حذف هذا القيد؟')) {
+            partnershipHistory = partnershipHistory.filter(t => t.id !== id);
+            updatePartnershipUI();
+        }
+    };
+
+    window.editPartnership = function(id) {
+        const p = partnershipHistory.find(t => t.id === id);
+        if (!p) return;
+        const newAmount = prompt('أدخل المبلغ الجديد:', p.amount);
+        if (newAmount !== null && newAmount.trim() !== '') {
+            p.amount = getUnformattedNumber(newAmount);
+            const newReason = prompt('أدخل السبب الجديد:', p.reason);
+            if (newReason !== null) p.reason = newReason;
+            updatePartnershipUI();
+        }
+    };
+
     function updatePartnershipUI() {
         window.saveToFirebase();
         updatePartnershipUIDisplay();
@@ -1038,6 +1157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalProfits = 0; // Code 1
         let totalSharedPayments = 0; // Code 0
         let totalPartnerPayments = 0; // Code 10
+        let aliSettlement = 0; // Code 98
+        let partnerSettlement = 0; // Code 99
 
         partnershipHistory.forEach(t => {
             const amt = Number(t.amount);
@@ -1047,11 +1168,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalSharedPayments += amt;
             } else if (t.code === '10') {
                 totalPartnerPayments += amt;
+            } else if (t.code === '98') {
+                aliSettlement += amt;
+            } else if (t.code === '99') {
+                partnerSettlement += amt;
             }
         });
 
-        const aliNet = (totalProfits / 2) - (totalSharedPayments / 2);
-        const partnerNet = (totalProfits / 2) - (totalSharedPayments / 2) - totalPartnerPayments;
+        const aliNet = (totalProfits / 2) - (totalSharedPayments / 2) + aliSettlement;
+        const partnerNet = (totalProfits / 2) - (totalSharedPayments / 2) - totalPartnerPayments + partnerSettlement;
 
         const formatter = new Intl.NumberFormat('en-US');
         
@@ -1087,15 +1212,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         codeLabel = 'دفع مشترك (0)'; typeColor = '#f39c12';
                     } else if (t.code === '10') {
                         codeLabel = 'دفع للشريك (10)'; typeColor = '#c0392b';
+                    } else if (t.code === '98' || t.code === '99') {
+                        codeLabel = 'تسوية حساب (' + t.code + ')'; typeColor = '#8e44ad';
                     }
 
                     return `
-                        <div class="transaction-card" style="border-right: 4px solid ${typeColor}; padding-right: 15px;">
-                            <div class="transaction-card-info">
+                        <div class="transaction-card" style="background: ${typeColor}15; border-right: 4px solid ${typeColor}; padding-right: 15px; display: flex; align-items: center; justify-content: space-between;">
+                            <div class="transaction-card-info" style="flex: 1;">
                                 <h4 style="color: ${typeColor}; margin-bottom: 0.5rem;">${codeLabel}</h4>
-                                <p><strong>المبلغ:</strong> <span dir="ltr">${formatter.format(t.amount)}</span> دينار</p>
+                                <p><strong>المبلغ:</strong> <span dir="ltr">${formatter.format(Math.abs(t.amount))}</span> دينار</p>
                                 <p><strong>التاريخ:</strong> ${t.date}</p>
                                 <p><strong>السبب:</strong> ${t.reason}</p>
+                            </div>
+                            <div class="transaction-actions" style="margin-right: 15px; display: flex; flex-direction: column; gap: 5px;">
+                                <button type="button" class="action-btn" onclick="window.editPartnership(${t.id})" title="تعديل">✏️</button>
+                                <button type="button" class="action-btn" onclick="window.deletePartnership(${t.id})" title="حذف">🗑️</button>
                             </div>
                         </div>
                     `;
@@ -1126,10 +1257,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (verifyResetPasswordBtn) {
         verifyResetPasswordBtn.addEventListener('click', () => {
             if (resetBalancePassword.value === window.getGlobalPassword()) {
-                partnershipHistory = [];
+                let totalProfits = 0, totalSharedPayments = 0, aliSettlement = 0;
+                partnershipHistory.forEach(t => {
+                    const amt = Number(t.amount);
+                    if (t.code === '1') totalProfits += amt;
+                    else if (t.code === '0') totalSharedPayments += amt;
+                    else if (t.code === '98') aliSettlement += amt;
+                });
+                const aliNet = (totalProfits / 2) - (totalSharedPayments / 2) + aliSettlement;
+
+                if (aliNet !== 0) {
+                    partnershipHistory.push({
+                        id: Date.now(),
+                        amount: -aliNet,
+                        code: '98',
+                        date: new Date().toISOString().split('T')[0],
+                        reason: 'تسوية وتصفير حساب (علي)'
+                    });
+                }
+                
                 updatePartnershipUI();
                 resetAliBalanceModal.style.display = 'none';
-                showCustomAlert('تم تصفير الحساب بنجاح!', '✅');
+                showCustomAlert('تم تصفير الحساب بنجاح وإضافة قيد تسوية!', '✅');
             } else {
                 showCustomAlert('كلمة المرور غير صحيحة', '❌');
             }
@@ -1158,30 +1307,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (verifyResetPartnerPasswordBtn) {
         verifyResetPartnerPasswordBtn.addEventListener('click', () => {
             if (resetPartnerPassword.value === window.getGlobalPassword()) {
-                // Determine current partner net to add a balancing transaction
-                let totalProfits = 0;
-                let totalSharedPayments = 0;
-                let totalPartnerPayments = 0;
+                let totalProfits = 0, totalSharedPayments = 0, totalPartnerPayments = 0, partnerSettlement = 0;
                 partnershipHistory.forEach(t => {
                     const amt = Number(t.amount);
                     if (t.code === '1') totalProfits += amt;
                     else if (t.code === '0') totalSharedPayments += amt;
                     else if (t.code === '10') totalPartnerPayments += amt;
+                    else if (t.code === '99') partnerSettlement += amt;
                 });
-                const partnerNet = (totalProfits / 2) - (totalSharedPayments / 2) - totalPartnerPayments;
+                const partnerNet = (totalProfits / 2) - (totalSharedPayments / 2) - totalPartnerPayments + partnerSettlement;
                 
                 if (partnerNet !== 0) {
                     partnershipHistory.push({
                         id: Date.now(),
-                        code: partnerNet > 0 ? '10' : '0', // If we owe partner, pay partner. If partner owes us, record as shared payment or something? Let's just reset the whole array if that's what's expected.
-                        // Actually, I'll just clear the array like Ali's reset for consistency, or just reset partner. I'll just clear it.
+                        amount: -partnerNet,
+                        code: '99',
+                        date: new Date().toISOString().split('T')[0],
+                        reason: 'تسوية وتصفير حساب (الشريك)'
                     });
                 }
                 
-                partnershipHistory = [];
                 updatePartnershipUI();
                 resetPartnerBalanceModal.style.display = 'none';
-                showCustomAlert('تم تصفير الحساب بنجاح!', '✅');
+                showCustomAlert('تم تصفير الحساب بنجاح وإضافة قيد تسوية!', '✅');
             } else {
                 showCustomAlert('كلمة المرور غير صحيحة', '❌');
             }
