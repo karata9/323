@@ -48,6 +48,7 @@
                     background: transparent;
                     padding: 6px 4px;
                     font-size: 0.9rem;
+                    text-align: center;
                   "
                 >
                   <option value="">اختر...</option>
@@ -70,12 +71,14 @@
                   type="text"
                   id="prop-number-right"
                   required
+                  inputmode="numeric" 
+                  pattern="[0-9]*"
                   style="
                     flex: 1;
                     min-width: 0;
                     border-radius: 0;
                     border-right: none;
-                    text-align: left;
+                    text-align: center;
                   "
                   dir="ltr"
                 />
@@ -84,27 +87,27 @@
             </div>
             <div class="form-row">
               <label>مساحة العقار</label>
-              <input type="text" id="prop-area" required />
+              <input type="text" id="prop-area" inputmode="numeric" pattern="[0-9]*" required style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label>التاريخ</label>
-              <input type="date" id="prop-date" required />
+              <input type="date" id="prop-date" required style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label>اسم البائع</label>
-              <input type="text" id="seller-name" required />
+              <input type="text" id="seller-name" required style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label>رقم هاتف البائع</label>
-              <input type="tel" id="seller-phone" />
+              <input type="tel" id="seller-phone" inputmode="numeric" pattern="[0-9]*" style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label>اسم المشتري</label>
-              <input type="text" id="buyer-name" required />
+              <input type="text" id="buyer-name" required style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label>رقم هاتف المشتري</label>
-              <input type="tel" id="buyer-phone" />
+              <input type="tel" id="buyer-phone" inputmode="numeric" pattern="[0-9]*" style="text-align: center;"/>
             </div>
             <div class="form-row">
               <label class="label-orange">مبلغ العقار</label>
@@ -112,7 +115,10 @@
                 type="text"
                 id="prop-amount"
                 class="number-format"
+                inputmode="numeric" 
+                pattern="[0-9]*"
                 required
+                style="text-align: center;"
               />
             </div>
             <div class="form-row">
@@ -121,7 +127,10 @@
                 type="text"
                 id="amount-received"
                 class="number-format"
+                inputmode="numeric" 
+                pattern="[0-9]*"
                 required
+                style="text-align: center;"
               />
             </div>
             <div class="form-row">
@@ -130,8 +139,11 @@
                 type="text"
                 id="amount-remaining"
                 class="text-center text-red number-format"
+                inputmode="numeric" 
+                pattern="[0-9]*"
                 readonly
                 value="0"
+                style="text-align: center;"
               />
             </div>
             <div class="form-row">
@@ -155,15 +167,15 @@
         <div class="transaction-index">
           <button
             type="button"
-            class="index-btn active"
+            class="index-btn btn-red-tab active"
             data-filter="غير مكتملة"
           >
             المعاملات الغير مكتملة
           </button>
-          <button type="button" class="index-btn" data-filter="جارية">
+          <button type="button" class="index-btn btn-green-tab" data-filter="جارية">
             المعاملات الجارية
           </button>
-          <button type="button" class="index-btn" data-filter="مكتملة">
+          <button type="button" class="index-btn btn-yellow-tab" data-filter="مكتملة">
             المعاملات المكتملة
           </button>
         </div>
@@ -172,7 +184,7 @@
           <input
             type="text"
             id="search-transactions"
-            placeholder="بحث برقم القطعة أو اسم البائع..."
+            placeholder="بحث برقم القطعة أو اسم البائع أو المشتري..."
           />
         </div>
 
@@ -542,7 +554,9 @@
               type="text"
               id="treasury-amount"
               class="number-format"
-              style="transition: all 0.3s ease"
+              inputmode="numeric" 
+              pattern="[0-9]*"
+              style="transition: all 0.3s ease; text-align: center;"
               required
             />
           </div>
@@ -553,7 +567,7 @@
             <input
               type="date"
               id="treasury-date"
-              style="transition: all 0.3s ease"
+              style="transition: all 0.3s ease; text-align: center;"
               required
             />
           </div>
@@ -604,6 +618,9 @@
               type="text"
               id="partner-amount"
               class="number-format"
+              inputmode="numeric" 
+              pattern="[0-9]*"
+              style="text-align: center;"
               required
             />
           </div>
@@ -619,6 +636,7 @@
                 border-radius: 8px;
                 font-size: 1rem;
                 font-family: &quot;Tajawal&quot;, sans-serif;
+                text-align: center;
               "
             >
               <option value="1">1 - أرباح</option>
@@ -628,7 +646,7 @@
           </div>
           <div class="form-group">
             <label>التاريخ</label>
-            <input type="date" id="partner-date" required />
+            <input type="date" id="partner-date" required style="text-align: center;"/>
           </div>
           <div class="form-group" style="width: 100%">
             <label>السبب</label>
@@ -734,7 +752,6 @@
       </div>
     </div>
 
-    <!-- Edit Balance Modal -->
     <style>
       @keyframes modalPop {
         0% {
@@ -851,6 +868,8 @@
             type="text"
             id="new-balance-amount"
             class="edit-balance-input number-format"
+            inputmode="numeric" 
+            pattern="[0-9]*"
             placeholder="0"
           />
           <button
@@ -883,7 +902,6 @@
       </div>
     </div>
 
-    <!-- Edit History Modal -->
     <div
       id="edit-history-modal"
       style="
@@ -953,6 +971,8 @@
             type="text"
             id="edit-history-amount"
             class="edit-balance-input number-format"
+            inputmode="numeric" 
+            pattern="[0-9]*"
             placeholder="المبلغ"
           />
           <input
@@ -1087,7 +1107,6 @@
       </div>
     </div>
 
-    <!-- Reset Ali Balance Modal -->
     <div
       id="reset-ali-balance-modal"
       style="
@@ -1168,7 +1187,6 @@
       </div>
     </div>
 
-    <!-- Reset Partner Balance Modal -->
     <div
       id="reset-partner-balance-modal"
       style="
@@ -1249,7 +1267,6 @@
       </div>
     </div>
 
-    <!-- Change Password Modal -->
     <div
       id="change-password-modal"
       style="
@@ -1336,7 +1353,6 @@
       </div>
     </div>
 
-    <!-- Custom 3D Alert Modal -->
     <div
       id="custom-alert-modal"
       style="
@@ -1407,7 +1423,6 @@
       </div>
     </div>
 
-    <!-- Commission Password Modal -->
     <div
       id="comm-password-modal"
       style="
