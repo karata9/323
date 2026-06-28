@@ -282,6 +282,10 @@ input:focus, select:focus, textarea:focus {
     margin-right: auto;
 }
 
+#add-property input {
+    text-align: center;
+}
+
 .form-row {
     display: flex;
     align-items: center;
@@ -514,6 +518,10 @@ input[type="file"] {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+.btn-red-tab.active { background-color: var(--danger-color) !important; color: white !important; }
+.btn-green-tab.active { background-color: var(--secondary-color) !important; color: white !important; }
+.btn-yellow-tab.active { background-color: #f1c40f !important; color: white !important; }
+
 .search-container {
     margin: 0 auto 2rem auto;
     max-width: 350px;
@@ -583,6 +591,11 @@ input[type="file"] {
     background: rgba(255, 255, 255, 0.8);
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.office-transaction {
+    border: 2px solid var(--secondary-color) !important;
+    background: rgba(39, 174, 96, 0.1) !important;
 }
 
 .transaction-card-info {
