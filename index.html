@@ -1,0 +1,1382 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-store, no-cache, must-revalidate, max-age=0"
+    />
+    <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>إدارة العقارات</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+      <h1>نظام إدارة العقارات</h1>
+      <button id="install-app-btn" class="btn-3d btn-primary" style="display: none; height: fit-content;">تثبيت التطبيق</button>
+    </header>
+    <main>
+      <section id="add-property" class="tab-content active">
+        <h2>إضافة عقار جديد</h2>
+        <form id="property-form">
+          <div class="form-grid">
+            <div class="form-row">
+              <label>رقم العقار</label>
+              <div
+                style="
+                  display: flex;
+                  flex: 1;
+                  min-width: 0;
+                  align-items: stretch;
+                "
+              >
+                <select
+                  id="prop-number-left"
+                  style="
+                    flex: 0 0 35%;
+                    border-radius: 0;
+                    border-left: 1px solid var(--glass-border);
+                    border-right: none;
+                    background: transparent;
+                    padding: 6px 4px;
+                    font-size: 0.9rem;
+                    text-align: center;
+                  "
+                >
+                  <option value="">اختر...</option>
+                  <option value="1">1</option>
+                  <option value="11">11</option>
+                  <option value="145">145</option>
+                </select>
+                <span
+                  style="
+                    padding: 0 5px;
+                    color: var(--text-color);
+                    font-weight: bold;
+                    background: rgba(255, 255, 255, 0.2);
+                    display: flex;
+                    align-items: center;
+                  "
+                  >/</span
+                >
+                <input
+                  type="text"
+                  id="prop-number-right"
+                  required
+                  inputmode="numeric" 
+                  style="
+                    flex: 1;
+                    min-width: 0;
+                    border-radius: 0;
+                    border-right: none;
+                    text-align: center;
+                  "
+                  dir="ltr"
+                />
+                <input type="hidden" id="prop-number" />
+              </div>
+            </div>
+            <div class="form-row">
+              <label>مساحة العقار</label>
+              <input type="text" id="prop-area" inputmode="numeric" required style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label>التاريخ</label>
+              <input type="date" id="prop-date" required style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label>اسم البائع</label>
+              <input type="text" id="seller-name" required style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label>رقم هاتف البائع</label>
+              <input type="tel" id="seller-phone" inputmode="numeric" style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label>اسم المشتري</label>
+              <input type="text" id="buyer-name" required style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label>رقم هاتف المشتري</label>
+              <input type="tel" id="buyer-phone" inputmode="numeric" style="text-align: center;"/>
+            </div>
+            <div class="form-row">
+              <label class="label-orange">مبلغ العقار</label>
+              <input
+                type="text"
+                id="prop-amount"
+                class="number-format"
+                inputmode="numeric" 
+                required
+                style="text-align: center;"
+              />
+            </div>
+            <div class="form-row">
+              <label class="label-green">الواصل</label>
+              <input
+                type="text"
+                id="amount-received"
+                class="number-format"
+                inputmode="numeric" 
+                required
+                style="text-align: center;"
+              />
+            </div>
+            <div class="form-row">
+              <label class="label-red">الباقي</label>
+              <input
+                type="text"
+                id="amount-remaining"
+                class="text-center text-red number-format"
+                inputmode="numeric" 
+                readonly
+                value="0"
+                style="text-align: center;"
+              />
+            </div>
+            <div class="form-row">
+              <label>صور العقار</label>
+              <button
+                type="button"
+                id="open-upload-modal"
+                class="upload-trigger-btn"
+              >
+                إضافة وعرض الصور <span id="image-count">(0)</span>
+              </button>
+            </div>
+            <button type="submit" class="btn-3d submit-btn">حفظ العقار</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="daily-transactions" class="tab-content">
+        <h2>المعاملات اليومية</h2>
+
+        <div class="transaction-index">
+          <button
+            type="button"
+            class="index-btn btn-red-tab active"
+            data-filter="غير مكتملة"
+          >
+            المعاملات الغير مكتملة
+          </button>
+          <button type="button" class="index-btn btn-green-tab" data-filter="جارية">
+            المعاملات الجارية
+          </button>
+          <button type="button" class="index-btn btn-yellow-tab" data-filter="مكتملة">
+            المعاملات المكتملة
+          </button>
+        </div>
+
+        <div class="search-container">
+          <input
+            type="text"
+            id="search-transactions"
+            placeholder="بحث برقم القطعة أو اسم البائع أو المشتري..."
+          />
+        </div>
+
+        <div class="transactions-sections">
+          <div class="transaction-group">
+            <div id="all-transactions-list" class="transactions-list">
+              <div class="empty-state">لا توجد معاملات حتى الآن.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="treasury"
+        class="tab-content"
+        style="padding: 0; background: transparent; box-shadow: none"
+      >
+        <div
+          class="treasury-tabs-nav"
+          style="
+            display: flex;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-radius: 16px 16px 0 0;
+          "
+        >
+          <button
+            type="button"
+            class="treasury-tab-btn active"
+            data-target="private-wallet"
+          >
+            محفظتي الخاصة
+          </button>
+          <button
+            type="button"
+            class="treasury-tab-btn"
+            data-target="partnership-wallet"
+          >
+            الدفعات والأرباح
+          </button>
+        </div>
+
+        <div
+          id="private-wallet"
+          class="treasury-tab-content active"
+          style="
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 16px 16px;
+          "
+        >
+          <div
+            class="actions"
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              margin-bottom: 1rem;
+            "
+          >
+            <button
+              type="button"
+              class="btn-3d btn-green"
+              id="btn-deposit"
+              style="flex: 1; max-width: 170px"
+            >
+              إضافة مبلغ
+            </button>
+            <button
+              type="button"
+              class="btn-3d btn-red"
+              id="btn-withdraw"
+              style="flex: 1; max-width: 170px"
+            >
+              سحب مبلغ
+            </button>
+          </div>
+          <h2>المحفظة الخاصة</h2>
+          <div class="card treasury-card">
+            <h3
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+              "
+            >
+              الرصيد الإجمالي
+            </h3>
+            <p class="balance" id="total-balance">0 دينار</p>
+          </div>
+
+          <div class="treasury-history">
+            <h3>سجل الحركات</h3>
+            <div id="treasury-history-list" class="transactions-list">
+              <div class="empty-state">لا توجد حركات في المحفظة حتى الآن.</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="partnership-wallet"
+          class="treasury-tab-content"
+          style="
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 16px 16px;
+          "
+        >
+          <div
+            class="actions"
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              margin-bottom: 1rem;
+            "
+          >
+            <button
+              type="button"
+              class="btn-3d btn-green"
+              id="btn-add-partnership"
+              style="flex: 1; max-width: 250px"
+            >
+              إضافة عملية شراكة
+            </button>
+          </div>
+          <h2>الدفعات والأرباح (شراكة)</h2>
+          <div
+            class="card partnership-summary-card"
+            style="margin-bottom: 2rem"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+              "
+            >
+              <div
+                style="
+                  flex: 1;
+                  min-width: 140px;
+                  padding: 15px;
+                  background: rgba(41, 128, 185, 0.1);
+                  border-radius: 12px;
+                  text-align: center;
+                  border: 1px solid rgba(41, 128, 185, 0.2);
+                "
+              >
+                <h4
+                  style="
+                    color: #2980b9;
+                    margin-bottom: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                  "
+                >
+                  صافي حساب علي
+                  <span
+                    id="reset-ali-balance-icon"
+                    style="
+                      cursor: pointer;
+                      font-size: 1.1rem;
+                      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+                      transition: transform 0.2s;
+                    "
+                    title="تصفير الحساب"
+                    onmouseover="this.style.transform = 'scale(1.2)'"
+                    onmouseout="this.style.transform = 'scale(1)'"
+                    >🔄</span
+                  >
+                </h4>
+                <p
+                  class="balance"
+                  id="ali-net"
+                  style="color: #2980b9; font-size: 1.4rem"
+                >
+                  0 دينار
+                </p>
+              </div>
+              <div
+                style="
+                  flex: 1;
+                  min-width: 140px;
+                  padding: 15px;
+                  background: rgba(192, 57, 43, 0.1);
+                  border-radius: 12px;
+                  text-align: center;
+                  border: 1px solid rgba(192, 57, 43, 0.2);
+                "
+              >
+                <h4
+                  style="
+                    color: #c0392b;
+                    margin-bottom: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                  "
+                >
+                  صافي حساب الشريك
+                  <span
+                    id="reset-partner-balance-icon"
+                    style="
+                      cursor: pointer;
+                      font-size: 1.1rem;
+                      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+                      transition: transform 0.2s;
+                    "
+                    title="تصفير الحساب"
+                    onmouseover="this.style.transform = 'scale(1.2)'"
+                    onmouseout="this.style.transform = 'scale(1)'"
+                    >🔄</span
+                  >
+                </h4>
+                <p
+                  class="balance"
+                  id="partner-net"
+                  style="color: #c0392b; font-size: 1.4rem"
+                >
+                  0 دينار
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="treasury-history">
+            <h3>سجل عمليات الشراكة</h3>
+            <div id="partnership-history-list" class="transactions-list">
+              <div class="empty-state">لا توجد حركات شراكة حتى الآن.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="settings"
+        class="tab-content"
+        style="padding: 20px; text-align: center"
+      >
+        <h2
+          style="
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+          "
+        >
+          الإعدادات
+        </h2>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+          "
+        >
+          <button
+            id="toggle-theme-btn"
+            class="btn-3d"
+            style="
+              background: linear-gradient(to bottom, #8e44ad, #9b59b6);
+              box-shadow:
+                0 6px 0 #732d91,
+                0 8px 15px rgba(142, 68, 173, 0.3);
+            "
+          >
+            ليلي / نهاري 🌙
+          </button>
+          <button
+            id="download-backup-btn"
+            class="btn-3d"
+            style="
+              background: linear-gradient(to bottom, #2ecc71, #27ae60);
+              box-shadow:
+                0 6px 0 #1e8449,
+                0 8px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            تحميل نسخة احتياطية 📥
+          </button>
+          <button
+            id="upload-backup-btn"
+            class="btn-3d"
+            style="
+              background: linear-gradient(to bottom, #f39c12, #e67e22);
+              box-shadow:
+                0 6px 0 #d35400,
+                0 8px 15px rgba(243, 156, 18, 0.3);
+            "
+          >
+            رفع نسخة احتياطية 📤
+          </button>
+          <input
+            type="file"
+            id="upload-backup-input"
+            style="display: none"
+            accept=".json"
+          />
+          <button
+            id="change-passwords-btn"
+            class="btn-3d"
+            style="
+              background: linear-gradient(to bottom, #e74c3c, #c0392b);
+              box-shadow:
+                0 6px 0 #922b21,
+                0 8px 15px rgba(231, 76, 60, 0.3);
+            "
+          >
+            تغيير كلمات السر 🔒
+          </button>
+        </div>
+      </section>
+    </main>
+    <nav class="tabs">
+      <button class="tab-btn active" data-target="add-property">
+        إضافة عقار
+      </button>
+      <button class="tab-btn" data-target="daily-transactions">
+        المعاملات اليومية
+      </button>
+      <button class="tab-btn" data-target="treasury">المحفظة</button>
+      <button class="tab-btn" data-target="settings">الإعدادات</button>
+    </nav>
+
+    <div id="treasury-modal" class="modal">
+      <div
+        id="treasury-modal-content"
+        class="modal-content"
+        style="max-width: 800px; width: 95%; transition: all 0.3s ease"
+      >
+        <h2 id="treasury-modal-title" style="transition: color 0.3s ease">
+          إضافة مبلغ
+        </h2>
+        <form id="treasury-form">
+          <input type="hidden" id="treasury-type" value="deposit" />
+          <div class="form-group">
+            <label id="lbl-treasury-amount" style="transition: color 0.3s ease"
+              >المبلغ (دينار)</label
+            >
+            <input
+              type="text"
+              id="treasury-amount"
+              class="number-format"
+              inputmode="numeric" 
+              style="transition: all 0.3s ease; text-align: center;"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label id="lbl-treasury-date" style="transition: color 0.3s ease"
+              >التاريخ</label
+            >
+            <input
+              type="date"
+              id="treasury-date"
+              style="transition: all 0.3s ease; text-align: center;"
+              required
+            />
+          </div>
+          <div class="form-group" style="width: 100%">
+            <label id="lbl-treasury-reason" style="transition: color 0.3s ease"
+              >السبب</label
+            >
+            <textarea
+              id="treasury-reason"
+              required
+              rows="6"
+              style="
+                width: 100%;
+                min-height: 150px;
+                font-size: 1.2rem;
+                padding: 15px;
+                transition: all 0.3s ease;
+              "
+            ></textarea>
+          </div>
+          <div class="modal-actions" style="margin-top: 20px">
+            <button
+              type="submit"
+              id="submit-treasury-btn"
+              class="btn-3d btn-green"
+            >
+              حفظ
+            </button>
+            <button
+              type="button"
+              id="cancel-treasury-btn"
+              class="btn-3d btn-red"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="partnership-modal" class="modal">
+      <div class="modal-content" style="max-width: 800px; width: 95%">
+        <h2>إضافة عملية شراكة</h2>
+        <form id="partnership-form">
+          <div class="form-group">
+            <label>المبلغ (دينار)</label>
+            <input
+              type="text"
+              id="partner-amount"
+              class="number-format"
+              inputmode="numeric" 
+              style="text-align: center;"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>كود العملية</label>
+            <select
+              id="partner-code"
+              required
+              style="
+                width: 100%;
+                padding: 0.8rem;
+                border: 2px solid #bdc3c7;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-family: &quot;Tajawal&quot;, sans-serif;
+                text-align: center;
+              "
+            >
+              <option value="1">1 - أرباح</option>
+              <option value="0">0 - دفع مشترك</option>
+              <option value="10">10 - دفع للشريك فقط</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>التاريخ</label>
+            <input type="date" id="partner-date" required style="text-align: center;"/>
+          </div>
+          <div class="form-group" style="width: 100%">
+            <label>السبب</label>
+            <textarea
+              id="partner-reason"
+              required
+              rows="6"
+              style="
+                width: 100%;
+                min-height: 150px;
+                font-size: 1.2rem;
+                padding: 15px;
+              "
+            ></textarea>
+          </div>
+          <div class="modal-actions" style="margin-top: 20px">
+            <button type="submit" class="btn-3d btn-green">حفظ</button>
+            <button
+              type="button"
+              id="cancel-partnership-btn"
+              class="btn-3d btn-red"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="fullscreen-image-modal" class="modal" style="z-index: 9999">
+      <div
+        class="modal-content"
+        style="
+          max-width: 95vw;
+          max-height: 95vh;
+          background: transparent;
+          box-shadow: none;
+          border: none;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <span
+          id="close-fullscreen-btn"
+          style="
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+          "
+          >&times;</span
+        >
+        <img
+          id="fullscreen-image"
+          src=""
+          style="
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+            object-fit: contain;
+          "
+        />
+      </div>
+    </div>
+
+    <div id="upload-modal" class="modal">
+      <div class="modal-content">
+        <h2>رفع صور العقار والمستمسكات</h2>
+        <div class="upload-area">
+          <input type="file" id="image-input" multiple accept="image/*" />
+          <label for="image-input" class="btn-3d btn-green">اختر الصور</label>
+          <p style="margin-top: 1rem; color: #7f8c8d">
+            (يمكنك اختيار أكثر من صورة)
+          </p>
+        </div>
+        <div id="image-preview" class="image-preview"></div>
+        <div class="modal-actions">
+          <button type="button" id="save-images-btn" class="btn-3d">
+            حفظ الصور
+          </button>
+          <button type="button" id="cancel-images-btn" class="btn-3d btn-red">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="details-modal" class="modal">
+      <div class="modal-content">
+        <h2>تفاصيل المعاملة</h2>
+        <div id="details-content" class="details-content"></div>
+        <div class="modal-actions">
+          <button type="button" id="close-details-btn" class="btn-3d btn-red">
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes modalPop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .edit-balance-input {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-align: center;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        outline: none;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .edit-balance-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .edit-balance-btn {
+        width: 100%;
+        border: none;
+        padding: 15px;
+        color: white;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.1s;
+        margin-bottom: 10px;
+        position: relative;
+      }
+      .edit-balance-btn:active {
+        transform: translateY(4px);
+        box-shadow: none !important;
+      }
+    </style>
+
+    <div
+      id="edit-history-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔒</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          تعديل الحركة
+        </h2>
+        <div id="history-password-section">
+          <input
+            type="password"
+            id="history-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور"
+          />
+          <button
+            type="button"
+            id="verify-history-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #27ae60, #2ecc71);
+              box-shadow:
+                0 4px 0 #1e8449,
+                0 5px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            دخول
+          </button>
+        </div>
+        <div id="edit-history-section" style="display: none">
+          <input
+            type="text"
+            id="edit-history-amount"
+            class="edit-balance-input number-format"
+            inputmode="numeric" 
+            placeholder="المبلغ"
+          />
+          <input
+            type="date"
+            id="edit-history-date"
+            class="edit-balance-input"
+            style="color: white; margin-bottom: 15px"
+            placeholder="التاريخ"
+          />
+          <textarea
+            id="edit-history-reason"
+            class="edit-balance-input"
+            style="
+              color: white;
+              min-height: 80px;
+              width: 100%;
+              margin-bottom: 15px;
+              padding: 10px;
+              border-radius: 10px;
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              background: rgba(0, 0, 0, 0.2);
+            "
+            placeholder="السبب"
+          ></textarea>
+          <button
+            type="button"
+            id="save-history-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #2980b9, #3498db);
+              box-shadow:
+                0 4px 0 #1f618d,
+                0 5px 15px rgba(52, 152, 219, 0.3);
+            "
+          >
+            حفظ التعديل
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-history-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            box-shadow:
+              0 4px 0 #922b21,
+              0 5px 15px rgba(231, 76, 60, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="delete-history-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔒</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          تأكيد حذف الحركة
+        </h2>
+        <div id="delete-history-password-section">
+          <input
+            type="password"
+            id="delete-history-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور"
+          />
+          <button
+            type="button"
+            id="verify-delete-history-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #e74c3c, #c0392b);
+              box-shadow:
+                0 4px 0 #922b21,
+                0 5px 15px rgba(231, 76, 60, 0.3);
+            "
+          >
+            تأكيد الحذف
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-delete-history-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #7f8c8d, #95a5a6);
+            box-shadow:
+              0 4px 0 #7f8c8d,
+              0 5px 15px rgba(127, 140, 141, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="reset-ali-balance-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 350px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔒</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          التحقق الأمني لتصفير الحساب
+        </h2>
+        <div id="reset-password-section">
+          <input
+            type="password"
+            id="reset-balance-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور"
+          />
+          <button
+            type="button"
+            id="verify-reset-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #27ae60, #2ecc71);
+              box-shadow:
+                0 4px 0 #1e8449,
+                0 5px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            تأكيد التصفير
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-reset-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            box-shadow:
+              0 4px 0 #922b21,
+              0 5px 15px rgba(231, 76, 60, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="reset-partner-balance-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 350px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔒</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          التحقق الأمني لتصفير حساب الشريك
+        </h2>
+        <div id="reset-partner-password-section">
+          <input
+            type="password"
+            id="reset-partner-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور"
+          />
+          <button
+            type="button"
+            id="verify-reset-partner-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #27ae60, #2ecc71);
+              box-shadow:
+                0 4px 0 #1e8449,
+                0 5px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            تأكيد التصفير
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-reset-partner-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            box-shadow:
+              0 4px 0 #922b21,
+              0 5px 15px rgba(231, 76, 60, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="change-password-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 350px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔑</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          تغيير كلمة المرور
+        </h2>
+        <div id="change-password-section">
+          <input
+            type="password"
+            id="old-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور الحالية"
+          />
+          <input
+            type="password"
+            id="new-password"
+            class="edit-balance-input"
+            placeholder="كلمة المرور الجديدة"
+          />
+          <button
+            type="button"
+            id="verify-change-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #27ae60, #2ecc71);
+              box-shadow:
+                0 4px 0 #1e8449,
+                0 5px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            تأكيد التغيير
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-change-password-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            box-shadow:
+              0 4px 0 #922b21,
+              0 5px 15px rgba(231, 76, 60, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="custom-alert-modal"
+      style="
+        display: none;
+        z-index: 3000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.8),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 350px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div
+          id="custom-alert-icon"
+          style="
+            font-size: 4rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+          "
+        >
+          ✨
+        </div>
+        <h2
+          id="custom-alert-message"
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            line-height: 1.5;
+          "
+        >
+          رسالة
+        </h2>
+        <button
+          type="button"
+          id="close-custom-alert-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #3498db, #2980b9);
+            box-shadow:
+              0 4px 0 #1f618d,
+              0 5px 15px rgba(52, 152, 219, 0.3);
+          "
+        >
+          حسناً
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="comm-password-modal"
+      style="
+        display: none;
+        z-index: 2000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        justify-content: center;
+        align-items: center;
+      "
+    >
+      <div
+        style="
+          background: linear-gradient(145deg, #1e1e38, #15152a);
+          padding: 35px;
+          border-radius: 20px;
+          box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.6),
+            inset 0 2px 0 rgba(255, 255, 255, 0.1);
+          width: 90%;
+          max-width: 350px;
+          text-align: center;
+          animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        "
+      >
+        <div style="font-size: 3rem; margin-bottom: 10px">🔒</div>
+        <h2
+          style="
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          "
+        >
+          تأكيد تغيير حالة العمولة
+        </h2>
+        <div id="comm-password-section">
+          <input
+            type="password"
+            id="comm-password-input"
+            class="edit-balance-input"
+            placeholder="كلمة المرور"
+          />
+          <button
+            type="button"
+            id="verify-comm-password-btn"
+            class="edit-balance-btn"
+            style="
+              background: linear-gradient(to bottom, #27ae60, #2ecc71);
+              box-shadow:
+                0 4px 0 #1e8449,
+                0 5px 15px rgba(46, 204, 113, 0.3);
+            "
+          >
+            تأكيد
+          </button>
+        </div>
+        <button
+          type="button"
+          id="close-comm-modal-btn"
+          class="edit-balance-btn"
+          style="
+            background: linear-gradient(to bottom, #c0392b, #e74c3c);
+            box-shadow:
+              0 4px 0 #922b21,
+              0 5px 15px rgba(231, 76, 60, 0.3);
+          "
+        >
+          إلغاء
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
