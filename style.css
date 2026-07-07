@@ -1,0 +1,829 @@
+:root {
+    --primary-color: #2980b9;
+    --primary-dark: #1c5980;
+    --secondary-color: #27ae60;
+    --secondary-dark: #1e8449;
+    --danger-color: #c0392b;
+    --danger-dark: #922b21;
+    --bg-color: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    --text-color: #2c3e50;
+    --card-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+body.dark-theme {
+    --bg-color: linear-gradient(135deg, #0d1117 0%, #161b22 100%) !important;
+    --text-color: #c9d1d9 !important;
+    --card-bg: rgba(30, 30, 40, 0.85) !important;
+    --glass-border: rgba(255, 255, 255, 0.1) !important;
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6) !important;
+    --primary-color: #58a6ff !important;
+    --primary-dark: #1f6feb !important;
+    
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-theme * {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-theme .stat-card,
+body.dark-theme .card,
+body.dark-theme .details-section,
+body.dark-theme .data-table,
+body.dark-theme .result-box {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+body.dark-theme .modal-content {
+    background: var(--card-bg);
+    color: var(--text-color) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+body.dark-theme .tab-content {
+    background: transparent !important;
+}
+
+body.dark-theme header, 
+body.dark-theme .tabs, 
+body.dark-theme .treasury-tabs-nav {
+    background: rgba(13, 17, 23, 0.8) !important;
+}
+
+body.dark-theme input, 
+body.dark-theme select, 
+body.dark-theme textarea {
+    background: rgba(1, 4, 9, 0.6);
+    color: #e1e1e6;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+body.dark-theme .data-table th {
+    background: rgba(1, 4, 9, 0.8) !important;
+    color: #e1e1e6 !important;
+}
+
+body.dark-theme td, 
+body.dark-theme .balance, 
+body.dark-theme .empty-state, 
+body.dark-theme h2, 
+body.dark-theme h3, 
+body.dark-theme h4, 
+body.dark-theme p, 
+body.dark-theme label {
+    color: var(--text-color) !important;
+}
+
+body.dark-theme .expense-item, 
+body.dark-theme .log-item {
+    background: rgba(22, 27, 34, 0.8) !important;
+    color: #e1e1e6 !important;
+}
+
+body.dark-theme .inline-form input {
+    background: rgba(1, 4, 9, 0.6);
+    color: #e1e1e6;
+}
+
+/* Fix for explicitly styled inline div backgrounds */
+body.dark-theme div[style*="background: rgba(255"] {
+    background: rgba(22, 27, 34, 0.8) !important;
+}
+body.dark-theme div[style*="background: white"] {
+    background: rgba(30, 30, 40, 0.85) !important;
+}
+
+body.dark-theme .transaction-group.bg-incomplete {
+    background: rgba(231, 76, 60, 0.3) !important;
+    border-color: rgba(231, 76, 60, 0.6) !important;
+}
+body.dark-theme .transaction-group.bg-ongoing {
+    background: rgba(46, 204, 113, 0.3) !important;
+    border-color: rgba(46, 204, 113, 0.6) !important;
+}
+body.dark-theme .transaction-group.bg-completed {
+    background: rgba(241, 196, 15, 0.3) !important;
+    border-color: rgba(241, 196, 15, 0.6) !important;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-color);
+    background-attachment: fixed;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--primary-dark);
+    text-align: center;
+    padding: 1.2rem 0;
+    box-shadow: var(--glass-shadow);
+}
+
+.tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    z-index: 1000;
+    border-radius: 20px 20px 0 0;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+/* 3D Button Style */
+.tab-btn {
+    flex: 1;
+    padding: 8px 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 0 #bdc3c7, 0 5px 8px rgba(0,0,0,0.1);
+    position: relative;
+    top: 0;
+}
+
+.tab-btn:active {
+    top: 4px;
+    box-shadow: 0 0 0 #bdc3c7, 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-dark);
+    box-shadow: 0 4px 0 var(--primary-dark), 0 5px 8px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+}
+
+.tab-btn.active:active {
+    top: 4px;
+    transform: translateY(0);
+    box-shadow: 0 0 0 var(--primary-dark), 0 2px 4px rgba(0,0,0,0.15);
+}
+
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    padding-bottom: 7rem;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.treasury-tab-btn {
+    padding: 0.8rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+    font-family: 'Tajawal', sans-serif;
+}
+
+.treasury-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.treasury-tab-btn.active {
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.treasury-tab-content {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.treasury-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 0.8rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.3s;
+    font-family: inherit;
+    color: var(--text-color);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--text-color);
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+/* Form Grid Styles */
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    align-items: stretch;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#add-property input {
+    text-align: center;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.form-row label {
+    flex: 0 0 28%;
+    padding: 6px 5px;
+    margin-bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-left: 1px solid var(--glass-border);
+    font-weight: 600;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.form-row input, .form-row select {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 0;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    background: transparent;
+}
+
+.form-row input:focus, .form-row select:focus {
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+.form-row input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+    font-weight: bold;
+}
+
+/* Custom Label Colors */
+.label-orange {
+    color: #e67e22;
+}
+.label-green {
+    color: var(--secondary-color);
+}
+.label-red {
+    color: var(--danger-color);
+}
+.text-center {
+    text-align: center;
+}
+.text-red {
+    color: var(--danger-color);
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Image Upload Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+.modal.active {
+    display: flex;
+}
+.modal-content {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+.upload-area {
+    margin: 1rem 0;
+    padding: 1.5rem;
+    border: 2px dashed rgba(189, 195, 199, 0.8);
+    border-radius: 8px;
+    background: rgba(248, 249, 250, 0.4);
+}
+.image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+.image-preview img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+input[type="file"] {
+    display: none;
+}
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.upload-trigger-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-align: right;
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.upload-trigger-btn:hover {
+    background: rgba(241, 245, 248, 0.5);
+}
+
+/* General 3D Action Buttons */
+.btn-3d {
+    display: inline-block;
+    padding: 8px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background-color: var(--text-color);
+    color: white;
+    transition: all 0.1s;
+    box-shadow: 0 4px 0 var(--primary-dark), 0 5px 8px rgba(0,0,0,0.15);
+    position: relative;
+    top: 0;
+    text-align: center;
+}
+
+.btn-3d:active {
+    top: 4px;
+    box-shadow: 0 0 0 var(--primary-dark), 0 2px 3px rgba(0,0,0,0.15);
+}
+
+.btn-green {
+    background-color: var(--secondary-color);
+    box-shadow: 0 4px 0 var(--secondary-dark), 0 5px 8px rgba(0,0,0,0.15);
+}
+.btn-green:active {
+    box-shadow: 0 0 0 var(--secondary-dark), 0 2px 3px rgba(0,0,0,0.15);
+}
+
+.btn-red {
+    background-color: var(--danger-color);
+    box-shadow: 0 4px 0 var(--danger-dark), 0 5px 8px rgba(0,0,0,0.15);
+}
+.btn-red:active {
+    box-shadow: 0 0 0 var(--danger-dark), 0 2px 3px rgba(0,0,0,0.15);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+}
+
+/* Daily Transactions Styles */
+.transaction-index {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0 auto 1.5rem auto;
+    justify-content: center;
+    background: #ecf0f1;
+    padding: 0.5rem;
+    border-radius: 12px;
+    max-width: 500px;
+}
+
+.index-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--text-color); opacity: 0.7;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.index-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-red-tab.active { background-color: var(--danger-color) !important; color: white !important; }
+.btn-green-tab.active { background-color: var(--secondary-color) !important; color: white !important; }
+.btn-yellow-tab.active { background-color: #f1c40f !important; color: white !important; }
+
+.search-container {
+    margin: 0 auto 2rem auto;
+    max-width: 350px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #bdc3c7;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.transactions-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.transaction-group {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.transaction-group.bg-incomplete {
+    background: rgba(231, 76, 60, 0.25) !important;
+    border-color: rgba(231, 76, 60, 0.6) !important;
+}
+
+.transaction-group.bg-ongoing {
+    background: rgba(46, 204, 113, 0.25) !important;
+    border-color: rgba(46, 204, 113, 0.6) !important;
+}
+
+.transaction-group.bg-completed {
+    background: rgba(241, 196, 15, 0.25) !important;
+    border-color: rgba(241, 196, 15, 0.6) !important;
+}
+
+.group-title {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.green-title {
+    color: var(--secondary-color);
+}
+
+.red-title {
+    color: var(--danger-color);
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.transaction-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.transaction-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.office-transaction {
+    border: 2px solid var(--secondary-color) !important;
+    background: rgba(39, 174, 96, 0.1) !important;
+}
+
+.transaction-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.transaction-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    padding: 5px;
+}
+
+.action-btn:hover {
+    transform: scale(1.2);
+}
+
+.transaction-card h4 {
+    margin-bottom: 0;
+    color: var(--text-color);
+}
+
+.transaction-card p {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+.transaction-card-arrow {
+    color: #bdc3c7;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.details-content {
+    text-align: right;
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+}
+
+.details-content p {
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.details-content p:last-child {
+    border-bottom: none;
+}
+
+.details-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.details-images img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #bdc3c7;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-color); opacity: 0.7;
+    padding: 1rem;
+}
+
+.treasury-card {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.balance {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin-top: 1rem;
+}
+
+/* --- NEW STYLES FOR PAYMENTS & COMMISSIONS TABLES --- */
+.details-section { margin-top: 20px; background: rgba(255,255,255,0.5); padding: 15px; border-radius: 10px; border: 1px solid var(--glass-border); }
+.details-title { font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 10px; font-weight: bold; border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; display: inline-block; }
+.data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; background: var(--card-bg); font-size: 0.9rem; border-radius: 5px; overflow: hidden; }
+.data-table th, .data-table td { border: 1px solid rgba(0,0,0,0.1); padding: 8px; text-align: center; }
+.data-table th { background: rgba(0,0,0,0.05); font-weight: bold; }
+.inline-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.inline-form input { flex: 1; min-width: 100px; padding: 8px; border: 1px solid var(--glass-border); border-radius: 5px; background: white; font-family: inherit;}
+.badge-paid { background: var(--secondary-color); color: white; padding: 5px 10px; border-radius: 12px; cursor: pointer; border: none; font-weight: bold; width: 100%; font-family: inherit;}
+.badge-unpaid { background: var(--danger-color); color: white; padding: 5px 10px; border-radius: 12px; cursor: pointer; border: none; font-weight: bold; width: 100%; font-family: inherit;}
+.result-box { display: flex; justify-content: space-between; background: white; border-right: 5px solid; padding: 12px; border-radius: 5px; margin-bottom: 10px; font-weight: bold; font-size: 1.05rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.result-box.seller { border-right-color: var(--danger-color); color: var(--danger-dark); }
+.result-box.office { border-right-color: var(--secondary-color); color: var(--secondary-dark); }
+
+.transaction-card.card-green {
+    background: rgba(46, 204, 113, 0.25) !important;
+}
+.transaction-card.card-yellow {
+    background: rgba(241, 196, 15, 0.25) !important;
+}
+.transaction-card.card-red {
+    background: rgba(231, 76, 60, 0.25) !important;
+}
+body.dark-theme .transaction-card.card-green {
+    background: rgba(46, 204, 113, 0.3) !important;
+}
+body.dark-theme .transaction-card.card-yellow {
+    background: rgba(241, 196, 15, 0.3) !important;
+}
+body.dark-theme .transaction-card.card-red {
+    background: rgba(231, 76, 60, 0.3) !important;
+}
+
+.transaction-card.card-purple {
+    background: rgba(142, 68, 173, 0.25) !important;
+}
+body.dark-theme .transaction-card.card-purple {
+    background: rgba(142, 68, 173, 0.3) !important;
+}
+
+.property-folder {
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.dark-theme .property-folder {
+    background: var(--dark-card);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.folder-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.folder-header:hover {
+    background: rgba(0,0,0,0.02);
+}
+
+body.dark-theme .folder-header:hover {
+    background: rgba(255,255,255,0.02);
+}
+
+.property-folder.expanded .folder-content {
+    display: block !important;
+}
+
+.property-folder.expanded .folder-arrow {
+    transform: rotate(-90deg);
+}
+
+.folder-arrow {
+    transition: transform 0.3s ease;
+}
+
+.folder-content .transaction-card {
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.folder-content .transaction-card:last-child {
+    margin-bottom: 0;
+}
+
+
+
+/* Force High Contrast Text for Transaction Cards */
+.transaction-card h4, 
+.transaction-card p, 
+.transaction-card span,
+.transaction-card strong {
+    color: #000 !important;
+}
+
+body.dark-theme .transaction-card h4, 
+body.dark-theme .transaction-card p, 
+body.dark-theme .transaction-card span,
+body.dark-theme .transaction-card strong {
+    color: #fff !important;
+}
