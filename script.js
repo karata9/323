@@ -50,6 +50,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    function normalizeWhatsAppPhone(phone) {
+        if (!phone) return '';
+        const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+        const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+        let cleaned = phone.toString()
+            .replace(/[٠-٩]/g, d => arabicDigits.indexOf(d))
+            .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
+            .replace(/[^\d]/g, '');
+
+        if (cleaned.startsWith('00')) cleaned = cleaned.slice(2);
+        if (cleaned.startsWith('0')) cleaned = '964' + cleaned.slice(1);
+        if (cleaned.length === 10 && cleaned.startsWith('7')) cleaned = '964' + cleaned;
+        return cleaned;
+    }
+
+    window.sendWhatsAppMessage = function(text, phone = '') {
+        const normalizedPhone = normalizeWhatsAppPhone(phone);
+        if (phone && !normalizedPhone) {
+            showCustomAlert('رقم الواتساب غير صحيح أو غير موجود.', '!');
+            return;
+        }
+
+        if (confirm('هل تريد إرسال الرسالة عبر واتساب؟')) {
+            const url = normalizedPhone
+                ? `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(text)}`
+                : `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+    };
+
+    window.sendCommissionWhatsApp = function(id, type) {
+        const t = transactionsData.find(x => x.id === id);
+        if (!t) return;
+
+        const isSeller = type === 'seller';
+        const party = isSeller ? 'البائع' : 'المشتري';
+        const name = isSeller ? t.sellerName : t.buyerName;
+        const phone = isSeller ? t.sellerPhone : t.buyerPhone;
+        const commission = Number(isSeller ? t.commissions.seller : t.commissions.buyer);
+        const isPaid = isSeller ? t.commissions.sellerPaid : t.commissions.buyerPaid;
+
+        if (!phone) {
+            showCustomAlert(`لا يوجد رقم هاتف مسجل لـ ${party}.`, '!');
+            return;
+        }
+
+        const waMsg = `تفاصيل عمولة ${party}
+رقم العقار: ${t.propNumber || '-'}
+${party}: ${name || '-'}
+مبلغ العمولة: ${commission.toLocaleString('en-US')} دينار
+حالة العمولة: ${isPaid ? 'مدفوعة' : 'غير مدفوعة'}
+تاريخ المعاملة: ${t.propDate || '-'}`;
+
+        window.sendWhatsAppMessage(waMsg, phone);
+    };
+
     // Number formatting helper removed per user request
 
     function getUnformattedNumber(value) {
@@ -685,12 +741,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tbody>
                         <tr>
                             <td>البائع</td>
-                            <td><input type="text" class="number-format" inputmode="numeric" value="${Number(t.commissions.seller).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'seller', this.value)" style="width:100px; text-align:center;"></td>
+                            <td>
+                                <input type="text" class="number-format" inputmode="numeric" value="${Number(t.commissions.seller).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'seller', this.value)" style="width:100px; text-align:center;">
+                                <button type="button" class="btn-3d btn-green" style="padding: 6px 10px; margin-right: 6px; font-size: 0.8rem;" onclick="window.sendCommissionWhatsApp(${t.id}, 'seller')">واتساب</button>
+                            </td>
                             <td><button type="button" class="${t.commissions.sellerPaid ? 'badge-paid' : 'badge-unpaid'}" onclick="window.toggleComm(${t.id}, 'seller')">${t.commissions.sellerPaid ? 'مدفوع' : 'غير مدفوع'}</button></td>
                         </tr>
                         <tr>
                             <td>المشتري</td>
-                            <td><input type="text" class="number-format" inputmode="numeric" value="${Number(t.commissions.buyer).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'buyer', this.value)" style="width:100px; text-align:center;"></td>
+                            <td>
+                                <input type="text" class="number-format" inputmode="numeric" value="${Number(t.commissions.buyer).toLocaleString('en-US')}" onchange="window.updateComm(${t.id}, 'buyer', this.value)" style="width:100px; text-align:center;">
+                                <button type="button" class="btn-3d btn-green" style="padding: 6px 10px; margin-right: 6px; font-size: 0.8rem;" onclick="window.sendCommissionWhatsApp(${t.id}, 'buyer')">واتساب</button>
+                            </td>
                             <td><button type="button" class="${t.commissions.buyerPaid ? 'badge-paid' : 'badge-unpaid'}" onclick="window.toggleComm(${t.id}, 'buyer')">${t.commissions.buyerPaid ? 'مدفوع' : 'غير مدفوع'}</button></td>
                         </tr>
                     </tbody>
@@ -763,9 +825,11 @@ document.addEventListener('DOMContentLoaded', () => {
         comprehensiveMsg += `مجموع الواصل: ${totalPaidByBuyer.toLocaleString('en-US')} دينار\n`;
         comprehensiveMsg += `المتبقي: ${currentPropRemaining.toLocaleString('en-US')} دينار\n`;
         const waMsg = encodeURIComponent(comprehensiveMsg);
+        window.currentDetailsWhatsAppMessage = comprehensiveMsg;
         
         actionsContainer.innerHTML = `
-            <button type="button" class="btn-3d" style="background: #25D366; box-shadow: 0 4px 0 #128C7E;" onclick="window.open('https://wa.me/?text=${waMsg}')">مراسلة عبر واتساب 💬</button>
+            <button type="button" class="btn-3d" style="background: #25D366; box-shadow: 0 4px 0 #128C7E;" onclick="window.sendWhatsAppMessage(window.currentDetailsWhatsAppMessage, '${t.sellerPhone || ''}')">واتساب البائع</button>
+            <button type="button" class="btn-3d" style="background: #25D366; box-shadow: 0 4px 0 #128C7E;" onclick="window.sendWhatsAppMessage(window.currentDetailsWhatsAppMessage, '${t.buyerPhone || ''}')">واتساب المشتري</button>
             <button type="button" id="close-details-btn" class="btn-3d btn-red">إغلاق</button>
         `;
         
